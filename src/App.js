@@ -7,15 +7,14 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/App.js</code> and save to reload.
+          Boiler Plate React App
         </p>
         <a
           className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
+          href="http://srvit.me"
           rel="noopener noreferrer"
         >
-          Learn React
+          Back to the Home Page
         </a>
       </header>
     </div>
