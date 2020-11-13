@@ -7,7 +7,7 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Boiler Plate React App
+          Place Holder for the Work Example React App
         </p>
         <a
           className="App-link"
