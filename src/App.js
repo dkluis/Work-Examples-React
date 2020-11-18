@@ -1,153 +1,131 @@
-import './App.css';
+import './App.css'
 import * as React from 'react'
-import Button from '@material-ui/core/Button';
+import axios from 'axios'
 
-import {makeStyles} from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
+import Button from '@material-ui/core/Button'
+import {makeStyles} from '@material-ui/core/styles'
+import {DataGrid} from '@material-ui/data-grid'
+import TextField from '@material-ui/core/TextField'
 
-import {DataGrid} from '@material-ui/data-grid';
 
-const useStyles = makeStyles({
-    table: {
-        minWidth: 600,
+const useTextFieldStyles = makeStyles((theme) => ({
+    root: {
+        '& .MuiTextField-root': {
+            margin: theme.spacing(1),
+            width: '4ch',
+        },
     },
-});
+}))
 
-const columns = [
-    // {field: 'id', headerName: 'row #', width: 70, type: 'number', sortable: false},
-    {field: 'showid', headerName: 'TVM ID', width: 130},
-    {field: 'showname', headerName: 'Name', width: 130},
-    {field: 'type', headerName: 'Type', width: 130},
-    //{
-    //    field: 'age',
-    //    headerName: 'Age',
-    //    type: 'number',
-    //    width: 90,
-    //},
-    //{
-    //    field: 'fullName',
-    //    headerName: 'Full name',
-    //    description: 'This column has a value getter and is not sortable.',
-    //    sortable: false,
-    //    width: 160,
-    //    valueGetter: (params) =>
-    //        `${params.getValue('firstName') || ''} ${
-    //            params.getValue('lastName') || ''
-    //        }`,
-    //},
-]
-
-//function tvm_data() {
-//    return fetch('http://srvit.me:8000/apis/v1/shows/page/1')
-//}
-
-const tvm_rows = [{
-    "id": 1,
-    "showid": "1000",
-    "showname": "Squidbillies",
-    "url": "http://www.tvmaze.com/shows/1000/squidbillies",
-    "type": "Animation",
-    "showstatus": "Running",
-    "premiered": "2005-10-16",
-    "language": "English",
-    "runtime": "15",
-    "network": "Adult Swim",
-    "country": "United States",
-    "tvrage": "2292",
-    "thetvdb": "79017",
-    "imdb": "tt0457146",
-    "tvmaze_updated": "1573498199",
-    "tvmaze_upd_date": "2019-11-11",
-    "status": "Skipped",
-    "download": "None",
-    "record_updated": "2019-11-11",
-    "alt_showname": "Squidbillies",
-    "alt_sn_override": "None",
-    "eps_count": "None",
-    "eps_updated": "None"
-}, {
-    "id": 2,
-    "showid": "1001",
-    "showname": "Bag of Bones",
-    "url": "http://www.tvmaze.com/shows/1001/bag-of-bones",
-    "type": "Scripted",
-}, {
-    "id": 3,
-    "showid": "1002",
-    "showname": "Camelot",
-    "url": "http://www.tvmaze.com/shows/1002/camelot",
-    "type": "Scripted",
-}]
-
-const rows = [{
-    "id": 1,
-    "showid": "123",
-    "showname": "Lost",
-    "type": "Scripted",
-}, {
-    "id": 2,
-    "showid": "17377",
-    "showname": "Lost",
-    "type": "Reality",
-}]
-
-function BasicTable() {
-    const classes = useStyles();
-
-    return (
-        <TableContainer component={Paper}>
-            <Table className={classes.table} aria-label="simple table">
-                <TableHead>
-                    <TableRow>
-                        <TableCell>TVMaze ID</TableCell>
-                        <TableCell align="right">Name</TableCell>
-                        <TableCell align="left">Type</TableCell>
-                        <TableCell align="left">Status</TableCell>
-                        <TableCell align="left">Premiered</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {rows.map((row) => (
-                        <TableRow key={row.showid}>
-                            <TableCell component="th" scope="row">
-                                {row.showid}
-                            </TableCell>
-                            <TableCell align="right">{row.showname}</TableCell>
-                            <TableCell align="left">{row.type}</TableCell>
-                            <TableCell align="left">{row.showstatus}</TableCell>
-                            <TableCell align="left">{row.premiered}</TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </TableContainer>
-    );
+const valueGetterEps = function (params) {
+    if (params.getValue('status') === 'Followed' && params.getValue('showstatus') !== 'In Development') {
+        return params.getValue('eps_count')
+    } else {
+        return ''
+    }
 }
 
-function EnhancedTable() {
+const columns = [
+    {field: 'id', headerName: 'Row', width: 80, type: 'number'},
+    {field: 'showid', headerName: 'TVM ID', width: 100},
+    {
+        field: 'showname',
+        headerName: 'Name',
+        width: 300,
+        resizeable: true,
+        type: 'string',
+        align: 'left',
+        headerAlign: 'left'
+    },
+    {field: 'type', headerName: 'Type', width: 130},
+    {field: 'showstatus', headerName: 'Status', width: 150},
+    {field: 'premiered', headerName: 'Premier Date', width: 130},
+    {field: 'language', headerName: 'Language', width: 130},
+    {field: 'network', headerName: 'Network', width: 130},
+    {field: 'country', headerName: 'Country', width: 130},
+    {field: 'status', headerName: 'Interest', width: 130},
+    {
+        field: 'eps_count',
+        headerName: 'Episodes',
+        descriptions: 'Only followed shows have keep track of episodes',
+        width: 130,
+        sortable: false,
+        valueGetter: valueGetterEps
+    },
+]
+
+
+class EnhancedTable extends React.Component {
+    state = {
+        records: []
+    }
+
+    componentDidMount() {
+        axios.get(`http://srvit.me:8000/apis/v1/shows/followed/id`)
+            .then(res => {
+                const records = res.data
+                this.setState({records})
+            })
+    }
+
+    render() {
+        return (
+            <div style={{height: 630, width: '100%'}}>
+                <DataGrid rows={this.state.records} columns={columns} pageSize={10} checkboxSelection
+                          rowsPerPageOptions={[10, 25, 50, 100]}/>
+            </div>
+        )
+    }
+}
+
+function hello(message, table) {
+    console.log(message, table)
+    alert('Look in the developer console to see the raw data-array for the ' + message)
+}
+
+function Intro() {
     return (
-        <div style={{height: 400, width: '100%'}}>
-            <DataGrid rows={tvm_rows} columns={columns} pageSize={10} checkboxSelection
-                      rowsPerPageOptions={[10, 25, 50, 100]}/>
+        <div>
+            <h1> Work Example handling some table formats</h1>
+            <h3> The current implemented API is http://srvit.me:8000/apis/v1/shows/followed/id</h3>
         </div>
+    )
+}
+
+function PageInput(props) {
+    const classes = useTextFieldStyles()
+    return (
+        <form className={classes.root}>
+            <div>
+                <p></p>
+                <em>Not Yet Implemented, just a placeholder for now </em>
+                Use the API to retrieve a set of ~1000 show per call:
+                <TextField required type='number' id='page-input' size='small'/>
+                <span> </span>
+                <Button variant='outlined' color='secondary'
+                        onClick={() => {
+                            hello(`Using API http://srvit.me:8000/apis/v1/shows/page/${TextField.valueOf('page_input')}`, "")
+                        }}>
+                    Retrieve </Button>
+                <p></p>
+            </div>
+        </form>
     )
 }
 
 function App() {
     return (
         <div className="App">
-            <Button variant="contained" color="primary">TVMaze Basic Table Example</Button>
-            <BasicTable/>
-            <Button variant="contained" color="secondary">TVMaze Data Grid Table Example</Button>
-            <EnhancedTable />
+            <Intro/>
+            <Button variant="contained" color="secondary"
+                    onClick={() => {
+                        hello('Testing retrieving API data', {test})
+                    }}>
+                TVMaze Data Grid Table Example</Button>
+            <PageInput/>
+            <EnhancedTable/>
         </div>
-    );
+    )
 }
 
 export default App;
